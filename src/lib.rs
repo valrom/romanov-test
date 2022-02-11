@@ -2,10 +2,20 @@
 
 const COMP_LIMIT: usize = 100;
 
+/// Implement basic function to split some generic computational work between threads.
+/// Split should occur only on some threshold - if computational work (input length) is shorter than this
+/// threshold, no splitting should occur and no threads should be created.
+/// You get as input: 
+/// 1. Vec<T>
+/// 2. Function f(t: T) -> R
+/// Threshold can be just constant. 
+/// You should return:
+///  1. Up to you, but probably some Vec of the same length as input(1)
+/// Code should be published on github.
 pub fn split_compitation<T ,R, F>(data: &Vec<T>, f: &F) -> Vec<R>
-    where T : Send + Sync + Copy + std::fmt::Debug + 'static,
-    R : Send + Copy + Default + 'static,
-    F : Send + Fn(T) -> R + Sync + 'static,
+    where T : Send + Sync + Copy,
+    R : Send,
+    F : Send + Fn(T) -> R + Sync,
 {
     let mut out_vec = Vec::with_capacity(data.len());
 
