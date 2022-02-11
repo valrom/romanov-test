@@ -1,5 +1,8 @@
 use std::thread;
 
+
+// Round 2
+
 const COMP_LIMIT: usize = 10;
 
 pub fn split_compitation<T ,R, F>(mut data: Vec<T>, f: &F) -> Vec<R>
