@@ -1,38 +1,30 @@
 use std::thread;
 
-const COMP_LIMIT: usize = 20;
+const COMP_LIMIT: usize = 10;
 
 pub fn split_compitation<T ,R, F>(mut data: Vec<T>, f: &F) -> Vec<R>
-    where T : Sync + 'static,
-    R : Send + 'static,
-    F : Send + Fn(T) -> R + Sync + 'static
+    where T : Send + Sync + Copy + std::fmt::Debug + 'static,
+    R : Send + Copy + Default + 'static,
+    F : Send + Fn(T) -> R + Sync + 'static,
 {
-    let mut out_vec = Vec::new();
+    let mut out_vec = vec![R::default(); data.len()];
 
     if data.len() < COMP_LIMIT {
-        for i in data {
-            out_vec.push(f(i));
+        for i in 0..data.len() {
+            out_vec[i] = f(data[i]);
         }
     } else {
         // Don't sure how much threads to create
         // Let it be 4
         const CHUNKS: usize = 4;
-
-        let mut joins = Vec::new();
-        let mut results: [Vec<R>; CHUNKS] = [Vec::new(); CHUNKS];
-
-        for (id, chunk) in data.chunks(CHUNKS).enumerate() {
-            let thread = thread::spawn(move || {
-                for &i in chunk {
-                    results.get_mut(id).unwrap().push(f(i));
-                }
-            });
-            joins.push(thread);
+        let step = CHUNKS / data.len();
+        
+        // split data to parts
+        let mut parts = Vec::with_capacity(CHUNKS);
+        for i in data.chunks(step) {
+            parts.push(Vec::from(i));
         }
-
-        for i in joins {
-            i.join().unwrap();
-        }
+        dbg!(&parts);
     }
 
     out_vec
